@@ -124,6 +124,52 @@ def blosc_extension():
 
     return extensions
 
+def sperr_extension():
+    import numpy
+    info('setting up SPERR extension')
+
+    extra_compile_args = list(base_compile_args)
+    define_macros = []
+
+    # setup sources 
+    sperr_sources = glob('SPERR/src/*.cpp')
+    include_dirs = [d for d in glob('SPERR/include') if os.path.isdir(d)]
+    include_dirs += [d for d in glob('SPERR/include/*') if os.path.isdir(d)]
+    include_dirs += ['numcodecs']
+    include_dirs += [numpy.get_include()]
+    # define_macros += [('CYTHON_TRACE', '1')]
+    language="c++",
+    extra_compile_args += [
+       '-std=c++17',
+       '-DUSE_VANILLA_CONFIG',
+       '-DSPERR_VERSION_MAJOR=0',
+       #'-DDEBUG',
+       '-g',
+       #'-O3',
+    ]
+    #extra_link_args=['-fopenmp']
+
+    if have_cython:
+        sources = ['numcodecs/sperr.pyx']
+    else:
+        sources = ['numcodecs/sperr.c']
+
+    # define extension module
+    extensions = [
+        Extension('numcodecs.sperr',
+                  sources=sources + sperr_sources,
+                  include_dirs=include_dirs,
+                  define_macros=define_macros,
+                  extra_compile_args=extra_compile_args,
+                  #extra_link_args=extra_link_args,
+                  ),
+    ]
+
+    if have_cython:
+        extensions = cythonize(extensions)
+
+    return extensions
+
 
 def zstd_extension():
     info('setting up Zstandard extension')
@@ -315,7 +361,7 @@ with open('README.rst') as f:
 def run_setup(with_extensions):
 
     if with_extensions:
-        ext_modules = (blosc_extension() + zstd_extension() + lz4_extension() +
+        ext_modules = (blosc_extension() + zstd_extension() + lz4_extension() + sperr_extension() +
                        compat_extension() + shuffle_extension() + vlen_extension())
 
         cmdclass = dict(build_ext=ve_build_ext)

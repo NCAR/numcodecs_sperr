@@ -2358,7 +2358,6 @@ static void __pyx_f_9numcodecs_8_shuffle__doUnshuffle(__Pyx_memviewslice __pyx_v
  *         for byte_index in range(count):
  *             j = byte_index*element_size + i             # <<<<<<<<<<<<<<
  *             des[j] = src[offset+byte_index]
- * 
  */
       __pyx_v_j = ((__pyx_v_byte_index * __pyx_v_element_size) + __pyx_v_i);
 
@@ -2366,7 +2365,6 @@ static void __pyx_f_9numcodecs_8_shuffle__doUnshuffle(__Pyx_memviewslice __pyx_v
  *         for byte_index in range(count):
  *             j = byte_index*element_size + i
  *             des[j] = src[offset+byte_index]             # <<<<<<<<<<<<<<
- * 
  */
       __pyx_t_8 = (__pyx_v_offset + __pyx_v_byte_index);
       __pyx_t_9 = __pyx_v_j;

@@ -202,19 +202,29 @@ def assert_array_items_equal(res, arr):
             assert a == r
 
 
-def check_encode_decode_array(arr, codec):
+def check_encode_decode_array(arr, codec,precision=None):
 
     enc = codec.encode(arr)
     dec = codec.decode(enc)
-    assert_array_items_equal(arr, dec)
+    if precision is None:
+        assert_array_items_equal(arr, dec)
+    else:
+        print('dec',dec.shape)
+        assert_array_almost_equal(arr, dec, decimal=precision) 
 
     out = np.empty_like(arr)
     codec.decode(enc, out=out)
-    assert_array_items_equal(arr, out)
+    if precision is None:
+        assert_array_items_equal(arr, out)
+    else:
+        assert_array_almost_equal(arr, out, decimal=precision) 
 
     enc = codec.encode(arr)
     dec = codec.decode(ensure_ndarray(enc))
-    assert_array_items_equal(arr, dec)
+    if precision is None:
+        assert_array_items_equal(arr, dec)
+    else:
+        assert_array_almost_equal(arr, dec, decimal=precision) 
 
 
 def check_config(codec):

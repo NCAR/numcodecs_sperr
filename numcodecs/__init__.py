@@ -68,6 +68,13 @@ except ImportError:  # pragma: no cover
     pass
 
 try:
+    from numcodecs import sperr
+    from numcodecs.sperr import Sperr
+    register_codec(Sperr)
+except ImportError:  # pragma: no cover
+    pass
+
+try:
     from numcodecs.zfpy import ZFPY
     register_codec(ZFPY)
 except ImportError:  # pragma: no cover
