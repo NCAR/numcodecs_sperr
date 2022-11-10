@@ -1,5 +1,6 @@
-Numcodecs
-=========
+Numcodecs_sperr
+===============
+SPERR is added to numcodecs as a lossy compressor, 
 
 Numcodecs is a Python package providing buffer compression and transformation 
 codecs for use in data storage and communication applications.
