@@ -80,16 +80,14 @@ def compress(
     threshold = np.abs(np.min(arr))
     threshold2 = np.min(np.absolute(arr))
     print('1 2 ',threshold, threshold2)
-    if threshold < 1:
+    if threshold2 < 1:
        exp = int(np.log10(np.abs(np.min(arr))))
        if exp == 0:
            level = 0.01
        else:
            level = 0.1**abs(exp)
        print('exp=',exp)
-    elif threshold > 1:
-       level = 0.1
-    else:
+    elif threshold >= 1:
        level = 0.1
     print(level)
     # Input validation
