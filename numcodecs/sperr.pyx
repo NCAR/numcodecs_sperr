@@ -54,6 +54,7 @@ def compress(
     int32_t mode = 3,
     double level = 0.01,
     int32_t nthreads = 1,
+    int32_t autolevel = 0,
 ):
     cdef int ndim = arr.ndim
     cdef int32_t is_float 
@@ -77,23 +78,25 @@ def compress(
 
 
     # Pick a compression level from max, min, average
-    threshold = np.abs(np.min(arr))
-    threshold2 = np.min(np.absolute(arr))
-    print('1 2 ',threshold, threshold2)
-    if threshold2 < 1:
-       exp = int(np.log10(np.abs(np.min(arr))))
-       if exp == 0:
-           level = 0.01
-       else:
-           level = 0.1**abs(exp)
-       print('exp=',exp)
-    elif threshold >= 1:
-       level = 0.1
-    print(level)
+    print('mode=',mode,'level=',level,'autolevel = ',autolevel)
+    if autolevel == 1:
+        threshold = np.abs(np.min(arr))
+        threshold2 = np.min(np.absolute(arr))
+        print('1 2 ',threshold, threshold2)
+        if threshold2 < 1:
+           exp = int(np.log10(np.abs(np.min(arr))))
+           if exp == 0:
+               level = 0.01
+           else:
+               level = 0.1**abs(exp+2)
+           print('exp=',exp)
+        elif threshold >= 1:
+           level = 0.1
+        print(level)
+
     # Input validation
     if arr is None:
         raise TypeError("Input array cannot be None")
-
     if arr.dtype == 'f4':
         is_float = 1
     elif arr.dtype == 'f8': 
@@ -101,14 +104,13 @@ def compress(
     if arr.ndim == 2:
         print("before 2d compression",level,is_float,arr.shape)
         ret=sperr_comp_2d(src_ptr,is_float,arr.shape[0],arr.shape[1],mode, level, &dst,&dst_len)
-        print('ret = ', ret)
     elif arr.ndim == 3:
         print("before 3d compression",level)
         sperr_comp_3d(src_ptr,is_float,arr.shape[0],arr.shape[1],arr.shape[2],arr.shape[0], arr.shape[1],arr.shape[2],mode, level,nthreads, &dst,&dst_len)
     else:
         print("Array dimension should be 2D or 3D")
     buf = <char *> &dst[0]
-    print("compress_str", dst_len)
+    print("compress_str length", dst_len)
     compress_str = (<char *> buf)[:dst_len]
 
 
@@ -136,11 +138,11 @@ def decompress(
     source_buffer = Buffer(source, PyBUF_ANY_CONTIGUOUS)
     src_ptr = source_buffer.ptr
     src_len = source_buffer.nbytes
-    print('src_len = ',src_len)
+    #print('src_len = ',src_len)
 
 
     sperr_parse_header(src_ptr,&version_major, &zstd_applied, &is_3d, &orig_is_float, &dim_x, &dim_y, &dim_z)
-    print(version_major, zstd_applied, is_3d, 'orig is float ',orig_is_float, dim_x, dim_y, dim_z)
+    #print(version_major, zstd_applied, is_3d, 'orig is float ',orig_is_float, dim_x, dim_y, dim_z)
     if orig_is_float == 0:
         the_type = np.float64
         output_float = 0
@@ -163,7 +165,7 @@ def decompress(
         arr = ensure_contiguous_ndarray(dest,flatten=False)
         dest_buffer = Buffer(arr, PyBUF_ANY_CONTIGUOUS | PyBUF_WRITEABLE)
         dest_ptr = dest_buffer.ptr
-        print('dest shape ',dest.shape, dest.dtype) 
+        #print('dest shape ',dest.shape, dest.dtype) 
 
    
     sperr_decomp_user_mem(src_ptr, src_len, output_float, nthreads, dest_ptr)
@@ -205,15 +207,17 @@ class Sperr(Codec):
        self,
        mode = 3,
        level = 0.01,
+       autolevel = 0
     ):
        self.mode = mode
        self.level = level
+       self.autolevel = autolevel
        
 
     def encode(self,buf):
         #buf = ensure_contiguous_ndarray(buf)
         #self.datatype=buf.dtype
-        return compress(buf, self.mode, self.level)
+        return compress(buf, self.mode, self.level, autolevel=self.autolevel)
 
     def decode(self,buf,out=None):
         #if self.datatype == 'f4':
@@ -224,9 +228,10 @@ class Sperr(Codec):
         return decompress(buf,out)
 
     def __repr__(self):
-        r = "%s(mode=%r,level=%s)" % (
+        r = "%s(mode=%r,level=%s,autolevel=%r)" % (
             type(self).__name__,
             self.mode,
             self.level,
+            self.autolevel,
 	)
         return r
