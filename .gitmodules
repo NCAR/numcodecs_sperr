@@ -3,4 +3,4 @@
 	url = https://github.com/Blosc/c-blosc.git
 [submodule "SPERR"]
 	path = SPERR
-	url = https://github.com/shaomeng/SPERR.git
+	url = https://github.com/NCAR/SPERR.git
