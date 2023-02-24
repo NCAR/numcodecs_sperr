@@ -2,5 +2,6 @@
 	path = c-blosc
 	url = https://github.com/Blosc/c-blosc.git
 [submodule "SPERR"]
+        branch=main 
 	path = SPERR
 	url = https://github.com/NCAR/SPERR.git

@@ -7,7 +7,15 @@ python setup.py build_ext --inplace
 git clone https://github.com/NCAR/numcodecs_sperr.git
 cd numcodecs_sperr
 git submodule update --init
+ 
+
+or 
 
 git submodule update --remote
 
 add branch=main in .gitmodule if 
+
+cp /glade/work/haiyingx/ADIOS2/py39_numcodecs_sperr.yml to your directory 
+
+module load gnu
+conda env create -f py39_numcodecs_sperr.yml
