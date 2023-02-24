@@ -19,3 +19,7 @@ cp /ADIOS2/py39_numcodecs_sperr.yml to your directory
 
 module load gnu
 conda env create -f py39_numcodecs_sperr.yml
+
+
+#added another repo (numcodecs) to update original numcodecs codes
+git remote add -f numcodecs_origin https://github.com/zarr-developers/numcodecs.git
