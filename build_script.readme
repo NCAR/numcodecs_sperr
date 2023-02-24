@@ -15,7 +15,7 @@ git submodule update --remote
 
 add branch=main in .gitmodule if 
 
-cp /glade/work/haiyingx/ADIOS2/py39_numcodecs_sperr.yml to your directory 
+cp /ADIOS2/py39_numcodecs_sperr.yml to your directory 
 
 module load gnu
 conda env create -f py39_numcodecs_sperr.yml
