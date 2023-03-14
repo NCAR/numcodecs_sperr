@@ -112,18 +112,18 @@ def blosc_extension():
     return extensions
 
 def sperr_extension():
-    import numpy
+    #import numpy
     info('setting up SPERR extension')
 
     extra_compile_args = list(base_compile_args)
     define_macros = []
 
     # setup sources 
-    sperr_sources = glob('SPERR/src/*.cpp')
+    #sperr_sources = glob('SPERR/src/*.cpp')
     include_dirs = [d for d in glob('SPERR/include') if os.path.isdir(d)]
     include_dirs += [d for d in glob('SPERR/include/*') if os.path.isdir(d)]
     include_dirs += ['numcodecs']
-    include_dirs += [numpy.get_include()]
+    #include_dirs += [numpy.get_include()]
     # define_macros += [('CYTHON_TRACE', '1')]
     language="c++",
     extra_compile_args += [
@@ -141,9 +141,11 @@ def sperr_extension():
     # define extension module
     extensions = [
         Extension('numcodecs.sperr',
-                  sources=sources + sperr_sources,
+                  sources=sources,
                   include_dirs=include_dirs,
-                  define_macros=define_macros,
+                  libraries=['SPERR','zstd'],
+                  library_dirs=['build/lib64/'],
+                  #define_macros=define_macros,
                   extra_compile_args=extra_compile_args,
                   #extra_link_args=extra_link_args,
                   ),

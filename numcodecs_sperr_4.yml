@@ -1,0 +1,18 @@
+name: scratch_numcodecs_sperr_5
+dependencies:
+  - python=3.9
+  - numpy   
+  - gcc=11.2.0  
+  - gxx=11.2.0  
+  - gfortran=11.2.0    
+  - ipykernel
+  - ucx
+  - openmpi=4.1.1
+  - mpi4py
+  - virtualenv
+  - zarr
+  - pip
+  - pip:
+    - dask-mpi
+    - dask
+    - distributed
