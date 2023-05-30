@@ -130,11 +130,12 @@ def sperr_extension():
        '-std=c++17',
        '-DUSE_VANILLA_CONFIG',
        '-DSPERR_VERSION_MAJOR=0',
+       '-I/glade/work/haiyingx/conda-envs/scratch_numcodecs_sperr_5/lib/python3.9/site-packages/numpy/core/include',
        #'-DDEBUG',
-       '-g',
+       #'-g',
        #'-O3',
     ]
-    #extra_link_args=['-fopenmp']
+    extra_link_args=['-fopenmp']
 
     sources = ['numcodecs/sperr.pyx']
 
@@ -144,10 +145,10 @@ def sperr_extension():
                   sources=sources,
                   include_dirs=include_dirs,
                   libraries=['SPERR','zstd'],
-                  library_dirs=['build/lib64/'],
+                  library_dirs=['lib64/'],
                   #define_macros=define_macros,
                   extra_compile_args=extra_compile_args,
-                  #extra_link_args=extra_link_args,
+                  extra_link_args=extra_link_args,
                   ),
     ]
 
