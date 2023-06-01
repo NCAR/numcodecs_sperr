@@ -65,6 +65,7 @@ with suppress(ImportError):
     from numcodecs.sperr import Sperr
     register_codec(Sperr)
 
+
 with suppress(ImportError):
     from numcodecs.zfpy import ZFPY
     register_codec(ZFPY)
@@ -119,3 +120,6 @@ with suppress(ImportError):
 
 from numcodecs.fletcher32 import Fletcher32
 register_codec(Fletcher32)
+
+from numcodecs.prefilter import Prefilter
+register_codec(Prefilter)
