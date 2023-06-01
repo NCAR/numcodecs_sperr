@@ -18,6 +18,7 @@ from cpython.bytes cimport PyBytes_FromStringAndSize, PyBytes_AS_STRING
 from .compat_ext cimport Buffer
 from .compat_ext import Buffer
 from .abc import Codec
+from .prefilter import Prefilter
 import math
 from numcodecs.compat import ensure_contiguous_ndarray,ensure_ndarray
 
@@ -29,12 +30,12 @@ cimport numpy as np
 cdef extern from "SPERR_C_API.h":
 
     # function declarations
-    int sperr_comp_2d(const void* src, int32_t is_float, size_t dimx, size_t dimy, int32_t mode,  double quality, void** dst, size_t* dst_len)
-    int sperr_decomp_2d(const void* src, size_t serc_len, int32_t output_float, size_t* dimx, size_t* dimy, void** dst)
-    void sperr_parse_header(const void*, int32_t* , int32_t*, int32_t*, int32_t*, uint32_t*, uint32_t*, uint32_t*)
-    int sperr_decomp_user_mem(const void*, size_t, int32_t, size_t, void*)
-    int sperr_comp_3d(const void* src,int32_t is_float, size_t dimx, size_t dimy, size_t dimz, size_t chunkx, size_t chunky, size_t chunkz, int32_t mode, double quality, int32_t nthreads,void** dst, size_t* dst_len)
-    int sperr_decomp_3d(const void* src, size_t serc_len, int32_t output_float,int32_t nthreads, size_t* dimx, size_t* dimy, size_t * dimz, void** dst)
+    int sperr_comp_2d(const void* src, int32_t is_float, size_t dimx, size_t dimy, int32_t mode,  double quality, void** dst, size_t* dst_len) nogil
+    int sperr_decomp_2d(const void* src, size_t serc_len, int32_t output_float, size_t* dimx, size_t* dimy, void** dst) nogil
+    void sperr_parse_header(const void*, int32_t* , int32_t*, int32_t*, int32_t*, uint32_t*, uint32_t*, uint32_t*) 
+    int sperr_decomp_user_mem(const void*, size_t, int32_t, size_t, void*) nogil
+    int sperr_comp_3d(const void* src,int32_t is_float, size_t dimx, size_t dimy, size_t dimz, size_t chunkx, size_t chunky, size_t chunkz, int32_t mode, double quality, int32_t nthreads,void** dst, size_t* dst_len) nogil
+    int sperr_decomp_3d(const void* src, size_t serc_len, int32_t output_float,int32_t nthreads, size_t* dimx, size_t* dimy, size_t * dimz, void** dst) nogil
 
 
 @cython.final
@@ -58,7 +59,6 @@ def compress(
 ):
     cdef int ndim = arr.ndim
     cdef int32_t is_float 
-    cdef void* source_data_pointer = <void *>arr.data
     cdef void* dst = NULL
     cdef char* src_ptr
     cdef char* buf
@@ -66,6 +66,7 @@ def compress(
     cdef int32_t qlev = 8
     cdef bytes compress_str = None
     cdef int32_t ret
+    cdef size_t shape1, shape2, shape3 
 
     print('input arr shape ', arr.ndim)
     if arr.dtype == object:
@@ -102,11 +103,18 @@ def compress(
     elif arr.dtype == 'f8': 
         is_float = 0
     if arr.ndim == 2:
+        shape1 = arr.shape[0]
+        shape2 = arr.shape[1]
         print("before 2d compression",level,is_float,arr.shape)
-        ret=sperr_comp_2d(src_ptr,is_float,arr.shape[0],arr.shape[1],mode, level, &dst,&dst_len)
+        with nogil:
+            ret=sperr_comp_2d(src_ptr,is_float,shape1,shape2,mode, level, &dst,&dst_len)
     elif arr.ndim == 3:
         print("before 3d compression",level)
-        sperr_comp_3d(src_ptr,is_float,arr.shape[0],arr.shape[1],arr.shape[2],arr.shape[0], arr.shape[1],arr.shape[2],mode, level,nthreads, &dst,&dst_len)
+        shape1 = arr.shape[0]
+        shape2 = arr.shape[1]
+        shape3 = arr.shape[2]
+        with nogil:
+            sperr_comp_3d(src_ptr,is_float,shape1,shape2,shape3,shape1, shape2,shape3,mode, level,nthreads, &dst,&dst_len)
     else:
         print("Array dimension should be 2D or 3D")
     buf = <char *> &dst[0]
@@ -119,10 +127,9 @@ def compress(
 
 def decompress(
     source, dest=None, nthreads=1, output_float=0):
-    #int32_t nthreads = 1,
-    
-    
-    #cdef int32_t output_float = 1
+
+    cdef int32_t nthreads_i=nthreads
+    cdef int32_t output_float_i = output_float
 
     cdef float* float_buf
     cdef double* double_buf
@@ -168,7 +175,8 @@ def decompress(
         #print('dest shape ',dest.shape, dest.dtype) 
 
    
-    sperr_decomp_user_mem(src_ptr, src_len, output_float, nthreads, dest_ptr)
+    with nogil:
+        sperr_decomp_user_mem(src_ptr, src_len, output_float_i, nthreads_i, dest_ptr)
 
     dest = ensure_ndarray(dest).view(the_type)
     dst = dest.reshape(buf_shape)
@@ -207,31 +215,45 @@ class Sperr(Codec):
        self,
        mode = 3,
        level = 0.01,
-       autolevel = 0
+       autolevel = 0,
+       pre = 0,
+       meta = None
     ):
        self.mode = mode
        self.level = level
        self.autolevel = autolevel
+       self.pre = pre
+       self.meta = meta
+           
        
 
     def encode(self,buf):
         #buf = ensure_contiguous_ndarray(buf)
         #self.datatype=buf.dtype
+        if self.pre:
+           pr =  Prefilter()
+           buf,meta=pr.encode(buf)
+           self.meta = meta
+           print('942',buf[4,7,2])
         return compress(buf, self.mode, self.level, autolevel=self.autolevel)
 
     def decode(self,buf,out=None):
-        #if self.datatype == 'f4':
-        #    output_float = 1
-        #else:
-        #    output_float = 0
         buf=ensure_contiguous_ndarray(buf,flatten=False)
-        return decompress(buf,out)
+        buf_out=decompress(buf,out)
+        print('942',buf_out[4,7,2])
+        if self.pre:
+            pr = Prefilter()
+            buf_out = pr.decode(buf_out,self.meta)
+        return buf_out
+        #return decompress(buf,out)
 
     def __repr__(self):
-        r = "%s(mode=%r,level=%s,autolevel=%r)" % (
+        r = "%s(mode=%r,level=%s,autolevel=%r,pre=%r,meta=%s)" % (
             type(self).__name__,
             self.mode,
             self.level,
             self.autolevel,
+            self.pre,
+            self.meta,
 	)
         return r

@@ -155,6 +155,39 @@ def sperr_extension():
 
     return extensions
 
+def prefilter_extension():
+    info('setting up prefilter extension')
+
+    extra_compile_args = list(base_compile_args)
+    define_macros = []
+
+    # setup sources 
+    include_dirs = [d for d in glob('MURaMKit/include') if os.path.isdir(d)]
+    include_dirs += [d for d in glob('MURaMKit/include/*') if os.path.isdir(d)]
+    include_dirs += ['numcodecs']
+    language="c++",
+    extra_compile_args += [
+       '-std=c++17',
+       '-I/glade/work/haiyingx/conda-envs/scratch_numcodecs_sperr_5/lib/python3.9/site-packages/numpy/core/include',
+    ]
+    #extra_link_args=['-fopenmp']
+
+    sources = ['numcodecs/prefilter.pyx']
+
+    # define extension module
+    extensions = [
+        Extension('numcodecs.prefilter',
+                  sources=sources,
+                  include_dirs=include_dirs,
+                  libraries=['MURaMKit','zstd'],
+                  library_dirs=['lib64/'],
+                  extra_compile_args=extra_compile_args,
+                  #extra_link_args=extra_link_args,
+                  ),
+    ]
+
+
+    return extensions
 
 def zstd_extension():
     info('setting up Zstandard extension')
@@ -335,7 +368,7 @@ def run_setup(with_extensions):
     if with_extensions:
         ext_modules = (blosc_extension() + zstd_extension() + lz4_extension() + sperr_extension() +
                        compat_extension() + shuffle_extension() + vlen_extension() +
-                       fletcher_extension())
+                       fletcher_extension() + prefilter_extension())
 
         cmdclass = dict(build_ext=ve_build_ext)
     else:
