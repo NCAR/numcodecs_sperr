@@ -152,10 +152,10 @@ def decompress(
     #print(version_major, zstd_applied, is_3d, 'orig is float ',orig_is_float, dim_x, dim_y, dim_z)
     if orig_is_float == 0:
         the_type = np.float64
-        output_float = 0
+        output_float_i = 0
     else:
         the_type = np.float32
-        output_float = 1
+        output_float_i = 1
     if is_3d == 0:
         buf_shape = (dim_x, dim_y)
         datashape = dim_x * dim_y 
@@ -234,6 +234,7 @@ class Sperr(Codec):
            pr =  Prefilter()
            buf,meta=pr.encode(buf)
            self.meta = meta
+           #print('942',buf[4,7,2])
         return compress(buf, self.mode, self.level, autolevel=self.autolevel)
 
     def decode(self,buf,out=None):
