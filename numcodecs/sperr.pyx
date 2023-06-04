@@ -68,7 +68,7 @@ def compress(
     cdef int32_t ret
     cdef size_t shape1, shape2, shape3 
 
-    print('input arr shape ', arr.ndim)
+    #print('input arr shape ', arr.ndim)
     if arr.dtype == object:
         raise TypeError('object arrays are not supported')
     if arr.ndim < 2 or arr.ndim > 3:
@@ -79,21 +79,21 @@ def compress(
 
 
     # Pick a compression level from max, min, average
-    print('mode=',mode,'level=',level,'autolevel = ',autolevel)
+    #print('mode=',mode,'level=',level,'autolevel = ',autolevel)
     if autolevel == 1:
         threshold = np.abs(np.min(arr))
         threshold2 = np.min(np.absolute(arr))
-        print('1 2 ',threshold, threshold2)
+        #print('1 2 ',threshold, threshold2)
         if threshold2 < 1:
            exp = int(np.log10(np.abs(np.min(arr))))
            if exp == 0:
                level = 0.01
            else:
                level = 0.1**abs(exp+2)
-           print('exp=',exp)
+           #print('exp=',exp)
         elif threshold >= 1:
            level = 0.1
-        print(level)
+        #print(level)
 
     # Input validation
     if arr is None:
@@ -105,11 +105,11 @@ def compress(
     if arr.ndim == 2:
         shape1 = arr.shape[0]
         shape2 = arr.shape[1]
-        print("before 2d compression",level,is_float,arr.shape)
+        #print("before 2d compression",level,is_float,arr.shape)
         with nogil:
             ret=sperr_comp_2d(src_ptr,is_float,shape1,shape2,mode, level, &dst,&dst_len)
     elif arr.ndim == 3:
-        print("before 3d compression",level)
+        #print("before 3d compression",level)
         shape1 = arr.shape[0]
         shape2 = arr.shape[1]
         shape3 = arr.shape[2]
@@ -118,7 +118,7 @@ def compress(
     else:
         print("Array dimension should be 2D or 3D")
     buf = <char *> &dst[0]
-    print("compress_str length", dst_len)
+    #print("compress_str length", dst_len)
     compress_str = (<char *> buf)[:dst_len]
 
 
@@ -234,13 +234,11 @@ class Sperr(Codec):
            pr =  Prefilter()
            buf,meta=pr.encode(buf)
            self.meta = meta
-           print('942',buf[4,7,2])
         return compress(buf, self.mode, self.level, autolevel=self.autolevel)
 
     def decode(self,buf,out=None):
         buf=ensure_contiguous_ndarray(buf,flatten=False)
         buf_out=decompress(buf,out)
-        print('942',buf_out[4,7,2])
         if self.pre:
             pr = Prefilter()
             buf_out = pr.decode(buf_out,self.meta)
