@@ -18,3 +18,19 @@ jobs:
       - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "The workflow is now ready to test your code on the runner."
       - run: echo "This job's status is ${{ job.status }}."
+
+      - name: Show info about `base` environment
+        shell: "bash -l {0}"
+        run: |
+          module load conda
+          conda info
+          conda config --show-sources
+          conda list --show-channel-urls
+    
+      - name: Set up `env`
+        shell: "bash -l {0}"
+        run: >
+          conda create -n env
+          c-compiler cxx-compiler
+          python=3.10  wheel pip
+
