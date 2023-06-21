@@ -33,4 +33,8 @@ jobs:
           conda create -n env
           c-compiler cxx-compiler
           python=3.10  wheel pip
+      - name: submit job
+        shell: "bash -l {0}"
+        run: qsub  -l select=1:ncpus=1:mpiprocs=1:mem=200G -A AHAO0002 -l walltime=0:05:00 -- "date && hostname" -q main
+        
 
