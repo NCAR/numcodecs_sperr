@@ -37,6 +37,7 @@ jobs:
         shell: "bash -l {0}"
         run: |
            echo $PWD
+           module load singularity
            singularity instance start --nv --bind /glade:/glade /glade/cheyenne/scratch/haiyingx/sperr-gnu_cuda_backend_kokkos_Cpp17.sif instance0
 
            qcmd -q main -l select=1:ncpus=1:mpiprocs=1 -A AHAO0002 -l walltime=0:05:00 -- "date && hostname" 
