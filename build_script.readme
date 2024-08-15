@@ -1,6 +1,7 @@
-module load gnu
-source activate numcodecs_tox
-source ~/pyenv/numcodecs-dev-py39/bin/activate
+module load gcc
+module load conda
+conda activate mpich_sperr_de
+source ../pyenv/numcodecs-dev/bin/activate
 python setup.py build_ext --inplace
 
 
