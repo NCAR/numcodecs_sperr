@@ -112,7 +112,7 @@ def blosc_extension():
     return extensions
 
 def sperr_extension():
-    #import numpy
+    import numpy
     info('setting up SPERR extension')
 
     extra_compile_args = list(base_compile_args)
@@ -123,19 +123,19 @@ def sperr_extension():
     include_dirs = [d for d in glob('SPERR/include') if os.path.isdir(d)]
     include_dirs += [d for d in glob('SPERR/include/*') if os.path.isdir(d)]
     include_dirs += ['numcodecs']
-    #include_dirs += [numpy.get_include()]
+    include_dirs += [numpy.get_include()]
     # define_macros += [('CYTHON_TRACE', '1')]
     language="c++",
     extra_compile_args += [
        '-std=c++17',
        '-DUSE_VANILLA_CONFIG',
        '-DSPERR_VERSION_MAJOR=0',
-       '-I/glade/work/haiyingx/conda-envs/scratch_numcodecs_sperr_5/lib/python3.9/site-packages/numpy/core/include',
+       #'-I/glade/work/haiyingx/conda-envs/scratch_numcodecs_sperr_5/lib/python3.9/site-packages/numpy/core/include',
        #'-DDEBUG',
        #'-g',
        #'-O3',
     ]
-    extra_link_args=['-fopenmp']
+    #extra_link_args=['-fopenmp']
 
     sources = ['numcodecs/sperr.pyx']
 
@@ -148,7 +148,7 @@ def sperr_extension():
                   library_dirs=['lib64/'],
                   #define_macros=define_macros,
                   extra_compile_args=extra_compile_args,
-                  extra_link_args=extra_link_args,
+                  #extra_link_args=extra_link_args,
                   ),
     ]
 
@@ -156,6 +156,7 @@ def sperr_extension():
     return extensions
 
 def prefilter_extension():
+    import numpy
     info('setting up prefilter extension')
 
     extra_compile_args = list(base_compile_args)
@@ -165,10 +166,11 @@ def prefilter_extension():
     include_dirs = [d for d in glob('MURaMKit/include') if os.path.isdir(d)]
     include_dirs += [d for d in glob('MURaMKit/include/*') if os.path.isdir(d)]
     include_dirs += ['numcodecs']
+    include_dirs += [numpy.get_include()]
     language="c++",
     extra_compile_args += [
        '-std=c++17',
-       '-I/glade/work/haiyingx/conda-envs/scratch_numcodecs_sperr_5/lib/python3.9/site-packages/numpy/core/include',
+       #'-I/glade/work/haiyingx/conda-envs/scratch_numcodecs_sperr_5/lib/python3.9/site-packages/numpy/core/include',
     ]
     #extra_link_args=['-fopenmp']
 
