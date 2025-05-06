@@ -282,8 +282,8 @@ class Sperr(Codec):
         #self.datatype=buf.dtype
         if self.pre:
            pr =  Prefilter(mode=self.pre)
-           buf,meta=pr.encode(buf)
-           self.meta = meta
+           buf=pr.encode(buf)
+           self.meta = pr.meta_str
            #print('942',buf[4,7,2])
         return compress(buf, self.mode, self.level, autolevel=self.autolevel)
 
