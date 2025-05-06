@@ -1,18 +1,16 @@
-name: scratch_numcodecs_sperr_5
+name: casper_sperr
 dependencies:
+  - pip=23.3.2
   - python=3.9
-  - numpy   
-  - gcc=11.2.0  
-  - gxx=11.2.0  
-  - gfortran=11.2.0    
   - ipykernel
-  - ucx
-  - openmpi=4.1.1
-  - mpi4py
   - virtualenv
+  - xarray
   - zarr
-  - pip
+  - mpi4py
+  - openmpi=4*=external_*
   - pip:
+    - numpy==1.24.3
     - dask-mpi
     - dask
     - distributed
+    - zfpy
